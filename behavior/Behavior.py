@@ -1,10 +1,11 @@
-from naoqi import ALProxy
 import numpy as np
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 import os
 import sys
 import cv2
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'qr'))
+sys.path.append('/home/blaxzter/Documents/robo/nao/pynaoqi-python2.7-2.1.2.17-linux64/')
+from naoqi import ALProxy
 from QRHandler import decodeImage
 
 
@@ -12,11 +13,11 @@ class Behaivior():
     def __init__(self):
         self.cameraId = 0  # 0 for
         self.vision = ALProxy('RobocupVision', 'nao1.local', 9559)
-        self.motion = ALProxy('Movement', 'nao1.local', 9559)
+        self.motion = ALProxy('ALMotion', 'nao1.local', 9559)
         self.run = True
-        self.states = ['searching', 'locateArea', 'movingToArea'] # TODO more States here
+        self.states = ['search', 'locateArea', 'movingToArea'] # TODO more States here
         self.state = 1
-        self.qrcodes = ['list', 'of', 'qrcodes']
+        self.qrcodes = ['red', 'blue', 'green']
 
 
     def run(self):
@@ -31,7 +32,9 @@ class Behaivior():
                 data = self.vision.getBGR24Image(self.cameraId)
                 image = np.fromstring(data, dtype=np.uint8).reshape((480, 640, 3))
                 rgb_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                qrcode = decodeImage(rgb_img)
+                plt.matshow(rgb_img)
+                plt.savefig('qrRec.png')
+                qrcode = decodeImage(os.path.dirname(__file__) + "/qrRec.png")
 
                 # process qrcode
                 if qrcode in self.qrcodes:
@@ -43,3 +46,7 @@ class Behaivior():
             elif self.state == 3:
                 # locate the area
                 print "Moving to area"
+
+if __name__ == '__main__':
+    agent = Behaivior()
+    agent.run()
