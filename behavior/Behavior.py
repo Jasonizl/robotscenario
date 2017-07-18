@@ -4,6 +4,7 @@ import os
 import sys
 import cv2
 import time
+import colorsys
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'qr'))
 sys.path.append('/home/blaxzter/Documents/robo/nao/pynaoqi-python2.7-2.1.2.17-linux64/')
 from naoqi import ALProxy
@@ -21,7 +22,8 @@ class Behaivior():
         self.state = 0
         self.detectet = -1
         self.qrcodes = ['red', 'blue', 'green']
-        self.states = ['Search for QR-Code', 'Locate Area ', 'moving to Area' ]
+        self.hsv_values = [0, 120, 180]
+        self.states = ['Search for QR-Code', 'orientate and move To']
 
     def run(self):
         while (self.running):
@@ -48,12 +50,44 @@ class Behaivior():
 
             elif self.state == 1:
                 # locate the area
-                print "Locate the area"
+                print "Orientate and Move to the Color"
+                on_color = False
+                while not on_color:
+                    count, pos = self.getColorPose(rgb_img, self.hsv_values[self.detectet])
+                    # if not found rotate and search
+                    if count <= 5:
+                        self.motion.moveTo(0, 0, 10 * np.pi / 180)
+                        continue
+                    # now do some shit if its found orient so the pos is in the middle
+
                 self.motion.rest()
                 return
             elif self.state == 2:
                 # locate the area
                 print "Moving to area"
+
+
+    def getColorPose(self, rgb_img, searched_h_value):
+
+        posx, posy = 0, 0
+        count = 0
+        for x in range(480):
+            for y in range(640):
+                r, g, b = rgb_img[x, y]
+                h, s, v = colorsys.rgb_to_hsv(r, g, b)
+                if s < 0.05:
+                    continue
+                dist = np.abs(searched_h_value - h * 360)
+                if dist < 5:
+                    posx += x
+                    posy += y
+                    count += 1
+
+        if count > 1:
+            posx /= count
+            posy /= count
+
+        return count, [posx, posy]
 
 if __name__ == '__main__':
     agent = Behaivior()
