@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '
 sys.path.append('/home/blaxzter/Documents/robo/nao/pynaoqi-python2.7-2.1.2.17-linux64/')
 from naoqi import ALProxy
 from QRHandler import decodeImage
-
+import dance
 
 class Behaivior():
     def __init__(self):
@@ -98,7 +98,7 @@ class Behaivior():
                             self.motion.moveTo(0, 0, - 8 * np.pi / 180)
 
             elif self.state == 2:
-                # TODO make some dacing stuff
+	        	self.motion.angleInterpolationBezier(dance())
                 self.tts.say("finished")
                 self.motion.rest()
                 return
