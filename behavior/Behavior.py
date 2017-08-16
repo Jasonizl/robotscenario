@@ -98,7 +98,7 @@ class Behaivior():
                             self.motion.moveTo(0, 0, - 8 * np.pi / 180)
 
             elif self.state == 2:
-	        	self.motion.angleInterpolationBezier(dance())
+	        self.motion.angleInterpolationBezier(dance())
                 self.tts.say("finished")
                 self.motion.rest()
                 return
